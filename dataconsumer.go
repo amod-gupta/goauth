@@ -1,23 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	//"github.com/Traceableai/goagent/instrumentation/net/traceablehttp"
 )
-
-/*
-func getHyperClient() http.Client {
-
-	client := http.Client{
-		Transport: traceablehttp.NewTransport(http.DefaultTransport),
-	}
-
-	return client
-}*/
 
 func getURL() string {
 	host, ok := os.LookupEnv("DATASERVICE_HOST")
@@ -34,19 +24,32 @@ func getURL() string {
 	return url
 }
 
-func getdata(id string) []byte {
+func getdata(id string, r *http.Request) []byte {
 
 	baseurl := getURL()
 	url := baseurl + "customer/test/" + id
-	//client := getHyperClient()
-	//response, err := client.Get(url)
 
-	response, err := http.Get(url)
+	//Prepare request
+	req, err := http.NewRequest(
+		"GET",
+		url,
+		bytes.NewBufferString("Body"),
+	)
+	req = req.WithContext(r.Context())
+	if err != nil {
+		log.Fatalf("failed to create the request: %v", err)
+	}
+	//client := &http.Client{}
+	client := getTraceableHttpClient()
+
+	//response, err := http.Get(url)
+	response, err := client.Do(req)
 
 	if err != nil {
 		fmt.Print(err.Error())
 		// Write error to response body
 	}
+	defer response.Body.Close()
 
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -56,17 +59,33 @@ func getdata(id string) []byte {
 	return responseData
 }
 
-func getallcustomers() []byte {
+func getallcustomers(r *http.Request) []byte {
 
 	baseurl := getURL()
 	url := baseurl + "customer/all"
-	response, err := http.Get(url)
 
+	//Prepare request
+	req, err := http.NewRequest(
+		"GET",
+		url,
+		bytes.NewBufferString("Body"),
+	)
+	req = req.WithContext(r.Context())
+	if err != nil {
+		log.Fatalf("failed to create the request: %v", err)
+	}
+
+	//response, err := http.Get(url)
+	//client := &http.Client{}
+	client := getTraceableHttpClient()
+
+	response, err := client.Do(req)
 	if err != nil {
 		fmt.Print(err.Error())
 		// Write error to response body
 	}
 
+	defer response.Body.Close()
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)
@@ -75,17 +94,34 @@ func getallcustomers() []byte {
 	return responseData
 }
 
-func getcustomerbyid(id string) []byte {
+func getcustomerbyid(id string, r *http.Request) []byte {
 
 	baseurl := getURL()
 	url := baseurl + "customer/byid/" + id
-	response, err := http.Get(url)
+
+	//Prepare request
+	req, err := http.NewRequest(
+		"GET",
+		url,
+		bytes.NewBufferString("Body"),
+	)
+	req = req.WithContext(r.Context())
+	if err != nil {
+		log.Fatalf("failed to create the request: %v", err)
+	}
+
+	//response, err := http.Get(url)
+	//client := &http.Client{}
+	client := getTraceableHttpClient()
+
+	response, err := client.Do(req)
 
 	if err != nil {
 		fmt.Print(err.Error())
 		// Write error to response body
 	}
 
+	defer response.Body.Close()
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)

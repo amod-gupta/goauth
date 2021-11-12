@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,6 +10,12 @@ import (
 
 	"github.com/Traceableai/goagent/instrumentation/net/traceablehttp"
 )
+
+func getTraceableHttpClient() http.Client {
+	return http.Client{
+		Transport: traceablehttp.NewTransport(http.DefaultTransport),
+	}
+}
 
 func getPriceURL() string {
 	host, ok := os.LookupEnv("PRICESERVICE_HOST")
@@ -25,22 +32,33 @@ func getPriceURL() string {
 	return url
 }
 
-func getpricehome() []byte {
+func getpricehome(r *http.Request) []byte {
 
 	url := getPriceURL()
 
-	client := http.Client{
-		Transport: traceablehttp.NewTransport(http.DefaultTransport),
+	//Prepare request
+	req, err := http.NewRequest(
+		"GET",
+		url,
+		bytes.NewBufferString("Body"),
+	)
+	req = req.WithContext(r.Context())
+	if err != nil {
+		log.Fatalf("failed to create the request: %v", err)
 	}
 
 	//response, err := http.Get(url)
-	response, err := client.Get(url)
+	//client := &http.Client{}
+	client := getTraceableHttpClient()
+
+	response, err := client.Do(req)
 
 	if err != nil {
 		fmt.Print(err.Error())
 		// Write error to response body
 	}
 
+	defer response.Body.Close()
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)
@@ -49,20 +67,34 @@ func getpricehome() []byte {
 	return responseData
 }
 
-func getbtcprice() []byte {
+func getbtcprice(r *http.Request) []byte {
 
 	baseurl := getPriceURL()
 	url := baseurl + "price/"
-	//client := getHyperClient()
-	//response, err := client.Get(url)
 
-	response, err := http.Get(url)
+	//Prepare request
+	req, err := http.NewRequest(
+		"GET",
+		url,
+		bytes.NewBufferString("Body"),
+	)
+	req = req.WithContext(r.Context())
+	if err != nil {
+		log.Fatalf("failed to create the request: %v", err)
+	}
+
+	//response, err := http.Get(url)
+	//client := &http.Client{}
+	client := getTraceableHttpClient()
+
+	response, err := client.Do(req)
 
 	if err != nil {
 		fmt.Print(err.Error())
 		// Write error to response body
 	}
 
+	defer response.Body.Close()
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)

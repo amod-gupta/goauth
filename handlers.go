@@ -92,20 +92,20 @@ func test(w http.ResponseWriter, r *http.Request) {
 
 	//w.Write([]byte(fmt.Sprintf("Welcome %s!", "Anonymous")))
 	params := mux.Vars(r)
-	w.Write(getdata(params["id"]))
+	w.Write(getdata(params["id"], r))
 }
 
 func customercount(w http.ResponseWriter, r *http.Request) {
 
 	//w.Write([]byte(fmt.Sprintf("Welcome %s!", "Anonymous")))
-	w.Write(getallcustomers())
+	w.Write(getallcustomers(r))
 }
 
 func customerbyid(w http.ResponseWriter, r *http.Request) {
 
 	//w.Write([]byte(fmt.Sprintf("Welcome %s!", "Anonymous")))
 	params := mux.Vars(r)
-	w.Write(getcustomerbyid(params["id"]))
+	w.Write(getcustomerbyid(params["id"], r))
 }
 
 func Refresh(w http.ResponseWriter, r *http.Request) {
@@ -168,11 +168,11 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 func cryptohome(w http.ResponseWriter, r *http.Request) {
 
 	//w.Write([]byte(fmt.Sprintf("Welcome %s!", "Anonymous")))
-	w.Write(getpricehome())
+	w.Write(getpricehome(r))
 }
 
 func cryptoprice(w http.ResponseWriter, r *http.Request) {
 
 	//w.Write([]byte(fmt.Sprintf("Welcome %s!", "Anonymous")))
-	w.Write(getbtcprice())
+	w.Write(getbtcprice(r))
 }
